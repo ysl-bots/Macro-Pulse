@@ -96,6 +96,12 @@ RUN_LIVE_SMOKE_TESTS=1 uv run python -m unittest discover tests
 RUN_SCREENSHOT_SMOKE_TESTS=1 uv run python -m unittest tests.test_screenshot
 ```
 
+Finviz 팝업 회귀 테스트 (외부 사이트 접속 없이 Chromium으로 검증):
+
+```bash
+RUN_SCREENSHOT_BROWSER_TESTS=1 uv run python -m unittest discover -s tests -p test_finviz_capture.py -v
+```
+
 ## 스크린샷 예시
 
 ### 미장 마감 예시

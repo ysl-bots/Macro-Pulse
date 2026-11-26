@@ -179,6 +179,42 @@ def position_element_for_capture(driver, element, top_offset=160):
     time.sleep(1)
 
 
+def prepare_finviz_capture(driver):
+    """Keep known Finviz promotions and feature tips out of the map capture."""
+    driver.execute_script(
+        """
+        // Dismiss existing popups through their own handlers to release modal state.
+        for (const selector of [
+            '#modal-elite-ad-close',
+            '[data-testid="elite-features-dialog-close"]',
+            '[aria-label="Map Layouts"] button[aria-label="Close"]',
+        ]) {
+            document.querySelector(selector)?.click();
+        }
+
+        // A persistent rule also covers popups mounted or reopened asynchronously.
+        // Target known UI only: generic dialog/tooltip rules can hide map content.
+        const id = 'macro-pulse-finviz-capture-style';
+        let style = document.getElementById(id);
+        if (!style) {
+            style = document.createElement('style');
+            style.id = id;
+            document.head.appendChild(style);
+        }
+        style.textContent = `
+            #modal-elite-ad,
+            [data-testid="elite-features-dialog"],
+            [aria-label="Map Layouts"] {
+                display: none !important;
+            }
+            [data-testid="elite-features-dialog"]::backdrop {
+                display: none !important;
+            }
+        `;
+        """
+    )
+
+
 def take_finviz_screenshot(output_path=None):
     driver = get_chrome_driver()
     if not driver:
@@ -188,6 +224,7 @@ def take_finviz_screenshot(output_path=None):
         output_path = resolve_output_path(output_path, "finviz_map")
         logger.info("Navigating to %s...", FINVIZ_URL)
         driver.get(FINVIZ_URL)
+        prepare_finviz_capture(driver)
 
         logger.info("Waiting for map element...")
         element = WebDriverWait(driver, 20).until(
@@ -197,6 +234,7 @@ def take_finviz_screenshot(output_path=None):
         logger.info("Waiting for canvas to render...")
         time.sleep(5)
 
+        prepare_finviz_capture(driver)
         element.screenshot(output_path)
         logger.info("Screenshot saved to %s", output_path)
         return output_path

@@ -27,6 +27,15 @@ jobs:
           macro-pulse:ci \
           sh -lc "uv run --frozen python -m unittest discover tests 2>&1 | tee unit-test.log"
 
+    - name: Test Finviz popup capture with offline Chromium fixtures
+      run: |
+        docker run --rm \
+          -v "$PWD:/app" \
+          -w /app \
+          -e RUN_SCREENSHOT_BROWSER_TESTS=1 \
+          macro-pulse:ci \
+          uv run --frozen python -m unittest discover -s tests -p test_finviz_capture.py -v
+
     - name: Upload CI artifacts
       if: always()
       uses: actions/upload-artifact@v6
