@@ -9,6 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_NO_DEV=1 \
+    UV_NO_SYNC=1 \
     CHROME_BIN=/usr/bin/chromium \
     CHROMEDRIVER_BIN=/usr/bin/chromedriver \
     PATH="/opt/venv/bin:/root/.local/bin:$PATH"
@@ -25,7 +27,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml uv.lock .python-version ./
-RUN uv sync --frozen --all-groups --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
 COPY . .
 
